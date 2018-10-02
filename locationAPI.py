@@ -1,4 +1,5 @@
 import pymysql
+from   datetime import datetime 
 
 from flask import (
     Flask,
@@ -13,18 +14,19 @@ def dbConnecttest(type):
     return (result)
 
 def dbConnect(type):
-    connection = pymysql.connect(host='localhost',
+    connection = pymysql.connect(host='192.168.0.17',
                                  user='dave',
-                                 password='zzz',
-                                 db='db',
+                                 password='Radius534!',
+                                 db='locationdb',
                                  charset='utf8mb4',
                                  cursorclass=pymysql.cursors.DictCursor)
     if type == "add": #Add a new record into the db
         try:
             with connection.cursor() as cursor:
                 #Create
-                sql = "INSERT INTO `users` (`email`, `password`) VALUES (%s, %s)"
-                cursor.execute(sql, ('webmaster@python.org', 'very-secret'))
+                timenow = str(datetime.now())
+                sql = "INSERT INTO `location` (`longit`, `lat`,'time') VALUES (%s, %s, %s)"
+                cursor.execute(sql, ('long', 'lat', timenow))
             connection.commit()
         finally:
             connection.close()
@@ -32,8 +34,9 @@ def dbConnect(type):
         try:
             with connection.cursor() as cursor:
                 # Read a single record
-                sql = "SELECT `id`, `password` FROM `users` WHERE `email`=%s"
-                cursor.execute(sql, ('webmaster@python.org',))
+                sql = "SELECT `lat`, `longit`,'time' FROM `location`" #WHERE `email`=%s"
+                #cursor.execute(sql, ('webmaster@python.org',))
+                cursor.execute(sql)
                 result = cursor.fetchone()
                 print(result) 
                 return (result)
@@ -53,8 +56,6 @@ def dbConnect(type):
         connection.close()        
                 
                     
-    
-
 # Create a URL route in our application for "/"
 @app.route('/')
 def home():
@@ -66,9 +67,16 @@ def home():
     """
     return render_template('home.html')
 
-@app.route('/current')
+@app.route('/current', endpoint='current')
 def current():
-    currentrec = dbConnecttest('read')   
+    #currentrec = dbConnecttest('read')   
+    currentrec = dbConnect('read')
+    return currentrec
+
+@app.route('/update/<lat>/<long>', endpoint='add')
+def add(lat,long):
+    #currentrec = dbConnecttest('read')
+    currentrec = dbConnect("add",lat,long)
     return currentrec
 
 # If we're running in stand alone mode, run the application
