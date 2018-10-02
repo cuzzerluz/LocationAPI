@@ -1,5 +1,6 @@
 import pymysql
 from   datetime import datetime 
+import sqlite3
 
 from flask import (
     Flask,
@@ -13,13 +14,15 @@ def dbConnecttest(type):
     result = type
     return (result)
 
-def dbConnect(type):
-    connection = pymysql.connect(host='192.168.0.17',
-                                 user='dave',
-                                 password='Radius534!',
-                                 db='locationdb',
-                                 charset='utf8mb4',
-                                 cursorclass=pymysql.cursors.DictCursor)
+def dbConnect(type,lat,long):
+    #connection = pymysql.connect(host='192.168.0.17',
+                                 #user='dave',
+                                 #password='Radius534!',
+                                 #db='locationdb',
+                                 #charset='utf8mb4',
+                                 #cursorclass=pymysql.cursors.DictCursor)
+    connection = sqlite3.connect("C:\SQLLiteDB\locationdb.db")
+ 
     if type == "add": #Add a new record into the db
         try:
             with connection.cursor() as cursor:
@@ -70,7 +73,7 @@ def home():
 @app.route('/current', endpoint='current')
 def current():
     #currentrec = dbConnecttest('read')   
-    currentrec = dbConnect('read')
+    currentrec = dbConnect('read',"","")
     return currentrec
 
 @app.route('/update/<lat>/<long>', endpoint='add')
